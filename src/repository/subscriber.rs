@@ -1,3 +1,5 @@
+use std::ops::Sub;
+
 use dashmap::DashMap;
 use lazy_static::lazy_static;
 use crate::model::subscriber::{self, Subscriber};
@@ -15,5 +17,13 @@ impl SubscriberRepository {
         SUBSCRIBERS.get(product_type).unwrap()
             .insert(subscriber_value.url.clone(), subscriber_value);
         return subscriber;
+
+    pub fn list_all(product_type: &str) -> Vec<Subscriber> {
+        if SUBSCRIBER.get(product_type).is_none() {
+            SUBSCRIBERS.insert(String::from(product__type), DashMap::new())
+        };
+
+        return SUBSCRIBERS.get(product_type).unwrap().iter()
+            .map(|f| f.value().clone()).collect();
     }
 }
