@@ -76,7 +76,26 @@ This is the place for you to write reflections:
 ### Mandatory (Publisher) Reflections
 
 #### Reflection Publisher-1
-
+1. Do we still need an interface/trait for Subscriber?
+In this BambangShop case, a single Model struct is enough. Since there is only one type of Subscriber (the receiver app), there is no need for a trait/interface. A trait would only be necessary if there were multiple different Subscriber types that need to be treated polymorphically.
+2. Vec vs DashMap — which is sufficient?
+DashMap is necessary. Since id in Product and url in Subscriber must be unique, we need a Map/Dictionary structure to enforce that uniqueness and allow fast O(1) lookups. Using a Vec would require iterating through all elements to check for duplicates or find a specific entry, which is less efficient and doesn't enforce uniqueness naturally.
+3. Do we still need DashMap or can we use Singleton pattern instead?
+We still need DashMap. The Singleton pattern only ensures a single instance of an object exists — it does not provide thread safety on its own. Since SUBSCRIBERS is accessed by multiple threads simultaneously (due to multi-threaded notifications), we need DashMap's built-in thread-safe concurrent access. Implementing Singleton with a regular HashMap would still require a separate synchronisation mechanism, so DashMap is the better and more practical choice here.
 #### Reflection Publisher-2
-
+1. Why separate Service and Repository from Model?
+To comply with the Single Responsibility Principle. A Model should only represent the data structure. If we put business logic into Service and data storage operations into Repository, each class has only one reason to change. This makes the code easier to test, maintain, and extend independently.
+2. What happens if we only use the Model?
+Each model (Program, Subscriber, Notification) would become bloated and tightly coupled to each other. For example, Program would need to know about Subscriber to send notifications, and Subscriber would need to know about Notification to format messages. This increases complexity significantly — any change in one model could break the others, making the code fragile and hard to maintain.
+3. How does Postman help?
+Postman helps by allowing us to test HTTP endpoints easily without writing a frontend. Features like saved collections, environment variables, and request history make it easy to repeatedly test subscribe, unsubscribe, create product, and publish endpoints. For the Group Project, the automated test scripts and collection sharing features are especially useful for team-based API testing.
 #### Reflection Publisher-3
+1. Which Observer variation is used?
+The Push model is used. The main app (Publisher) actively pushes notification data to each Subscriber by making HTTP POST requests to their URLs whenever an event (create, delete, promote) occurs.
+2. Advantages and disadvantages of using Pull model instead?
+
+Advantage: The Publisher would not need to know about each Subscriber's URL or state. Subscribers control when they retrieve data, reducing unnecessary notifications and giving them more control.
+Disadvantage: Subscribers would need to continuously poll the Publisher for updates, which is inefficient. Notifications would not be real-time — there would be a delay depending on how frequently Subscribers poll.
+
+3. What happens without multi-threading?
+Without multi-threading, the notify() function would send HTTP requests to each Subscriber sequentially (one by one). If one Subscriber is slow or unresponsive, the entire notification process would be blocked, causing the main app to hang and making it unresponsive to other requests until all notifications are sent. Multi-threading ensures each notification is sent concurrently, keeping the app responsive.

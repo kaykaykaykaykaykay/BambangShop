@@ -3,9 +3,9 @@ use rocket::log;
 use rocket::serde::json::to_string;
 use rocket::tokio;
 use bambangshop::REQWEST_CLIENT;
-use crate::model::notfication::Notification;
+use crate::model::notification::Notification;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
 
 pub struct Subscriber {
